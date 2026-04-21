@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>КП и смета, система Telegram-публикаций</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#07111f;
+      --bg2:#101c35;
+      --bg3:#0b1630;
+      --card:rgba(255,255,255,.06);
+      --card-2:rgba(255,255,255,.04);
+      --stroke:rgba(255,255,255,.1);
+      --text:#eef4ff;
+      --muted:#b9c6e3;
+      --accent:#78a7ff;
+      --accent2:#74f0ff;
+      --gold:#ffe7b2;
+      --good:#98f5b0;
+      --shadow:0 30px 100px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(120,167,255,.15), transparent 24%),
+        radial-gradient(circle at 85% 12%, rgba(116,240,255,.12), transparent 24%),
+        radial-gradient(circle at 50% 85%, rgba(255,231,178,.08), transparent 24%),
+        linear-gradient(135deg,var(--bg),var(--bg2),var(--bg3));
+      color:var(--text);
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.05;
+      background-image:radial-gradient(#fff .7px, transparent .7px);
+      background-size:18px 18px;
+    }
+    .wrap{width:min(1220px,calc(100% - 32px));margin:0 auto;padding:34px 0 70px}
+    .hero,.card{border:1px solid var(--stroke);background:var(--card);backdrop-filter:blur(14px);border-radius:30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .hero{padding:38px 34px 34px;margin-bottom:22px}
+    .hero::after,.card::after{
+      content:"";
+      position:absolute;
+      width:220px;height:220px;border-radius:50%;filter:blur(35px);opacity:.35;pointer-events:none;animation:float 8s ease-in-out infinite;
+      background:radial-gradient(circle, rgba(120,167,255,.55), transparent 60%);
+      right:-60px;top:-40px;
+    }
+    .card::after{width:180px;height:180px;right:auto;left:-50px;top:auto;bottom:-50px;background:radial-gradient(circle, rgba(116,240,255,.38), transparent 62%)}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.04);margin-bottom:18px;color:#dce9ff;font-size:13px}
+    .eyebrow i{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--accent2),var(--accent));box-shadow:0 0 16px rgba(116,240,255,.55);animation:pulse 2.4s ease-in-out infinite}
+    h1,h2,h3{margin:0 0 14px}
+    h1{font-family:Unbounded,sans-serif;font-size:clamp(30px,4vw,56px);line-height:1.03;letter-spacing:-.04em;max-width:980px}
+    h2{font-family:Unbounded,sans-serif;font-size:clamp(24px,3vw,36px);line-height:1.08}
+    h3{font-size:20px}
+    p{margin:0 0 14px;color:var(--muted);line-height:1.8}
+    .lead{max-width:980px;font-size:18px}
+    .badge-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+    .badge{padding:11px 14px;border-radius:16px;border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:#eef6ff;font-size:14px;animation:cardFloat 5s ease-in-out infinite}
+    .badge:nth-child(2){animation-delay:.4s}.badge:nth-child(3){animation-delay:.9s}.badge:nth-child(4){animation-delay:1.3s}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:22px 0}
+    .pkg{padding:24px;border:1px solid var(--stroke);border-radius:24px;background:var(--card-2);transition:.25s ease;position:relative;overflow:hidden}
+    .pkg::before{content:"";position:absolute;inset:-40% auto auto -10%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle, rgba(120,167,255,.22), transparent 65%);filter:blur(10px)}
+    .pkg:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,.18)}
+    .pkg strong{display:block;font-size:26px;margin:10px 0 6px}
+    .price{font-size:36px;font-weight:800;color:#fff;background:linear-gradient(90deg,#fff,#d7e9ff 40%,#96fbff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+    ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.75}
+    li{margin:0 0 8px}
+    .section{margin-top:18px}
+    .card{padding:30px;margin-top:18px}
+    .table{display:grid;gap:12px;margin-top:16px}
+    .row{display:grid;grid-template-columns:1.6fr .8fr .8fr;gap:14px;padding:15px 16px;border:1px solid var(--stroke);border-radius:18px;background:rgba(255,255,255,.03);transition:.22s ease}
+    .row:hover{transform:translateX(3px);background:rgba(255,255,255,.045)}
+    .row.head{font-weight:800;color:#fff;background:rgba(120,167,255,.08)}
+    .note{padding:18px 20px;border-radius:18px;border:1px solid rgba(116,240,255,.18);background:rgba(116,240,255,.06);color:#def7ff;margin-top:18px}
+    .ok{color:var(--good);font-weight:700}
+    .footer{margin-top:18px;color:var(--muted);font-size:14px}
+    .split{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .mini{padding:20px;border-radius:22px;border:1px solid var(--stroke);background:rgba(255,255,255,.035)}
+    .cta{display:inline-flex;align-items:center;justify-content:center;padding:17px 26px;border-radius:18px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06101f;text-decoration:none;font-weight:800;box-shadow:0 20px 40px rgba(116,240,255,.18);transition:.22s ease}
+    .cta:hover{transform:translateY(-2px) scale(1.01)}
+    .reveal{opacity:0;transform:translateY(24px) scale(.985);transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1)}
+    .reveal.show{opacity:1;transform:translateY(0) scale(1)}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+    @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    @media (max-width:980px){.grid,.split{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero reveal">
+      <div class="eyebrow"><i></i> Коммерческое предложение</div>
+      <h1>Система автоматических Telegram-публикаций для рынков, макроэкономики, геополитики и официальных документов</h1>
+      <p class="lead">Ниже собрана понятная и коммерчески внятная структура по разработке, запуску и сопровождению системы, которая автоматически собирает рыночные, макроэкономические, геополитические и документарные данные из проверенных источников, структурирует их, формирует шаблонные посты и публикует их в Telegram по заданному расписанию.</p>
+      <p class="lead">Проект строится как информационная система без торговых сигналов, без инвестиционных рекомендаций, без прогнозов движения цены и без советов по сделкам.</p>
+      <div class="badge-row">
+        <div class="badge">Draft и Auto publish режимы</div>
+        <div class="badge">Проверенные источники высокого уровня</div>
+        <div class="badge">Плановая публикация и alert-посты</div>
+        <div class="badge">Шаблоны, изображения, антидубликация</div>
+      </div>
+    </section>
+
+    <section class="card section reveal">
+      <h2>Пакеты разработки</h2>
+      <div class="grid">
+        <div class="pkg">
+          <h3>Пакет 1. Базовый MVP</h3>
+          <div class="price">от 180 000 ₽</div>
+          <div class="sub">Срок: 2–4 недели</div>
+          <ul>
+            <li>Интеграция с Telegram Bot API</li>
+            <li>Draft mode и Auto publish mode</li>
+            <li>Котировки ключевых инструментов</li>
+            <li>Базовый экономический календарь</li>
+            <li>Утренний, дневной и вечерний шаблоны постов</li>
+            <li>Scheduler, retry, защита от дублей</li>
+            <li>Базовое логирование и управление публикациями</li>
+          </ul>
+        </div>
+        <div class="pkg">
+          <h3>Пакет 2. Рабочая система</h3>
+          <div class="price">от 450 000 ₽</div>
+          <div class="sub">Срок: 1–2 месяца</div>
+          <ul>
+            <li>Всё из базового пакета</li>
+            <li>Модули по регуляторам и центробанкам</li>
+            <li>Официальные документы, решения, пресс-релизы</li>
+            <li>Корпоративные документы и события</li>
+            <li>Геополитические и международные новости</li>
+            <li>Изображения для стандартных постов</li>
+            <li>Гибкие шаблоны и вынесенные настройки</li>
+            <li>Docker / VPS-ready архитектура</li>
+          </ul>
+        </div>
+        <div class="pkg">
+          <h3>Пакет 3. Продакшн+</h3>
+          <div class="price">от 950 000 ₽</div>
+          <div class="sub">Срок: 2–4 месяца</div>
+          <ul>
+            <li>Всё из рабочего пакета</li>
+            <li>Расширенный provider layer</li>
+            <li>Полноценная админ-панель / управление</li>
+            <li>Расширение по странам, рынкам и источникам</li>
+            <li>Alert-логика и продвинутые сценарии публикации</li>
+            <li>Усиленная стабильность и отказоустойчивость</li>
+            <li>Продуманная антидубликация и оркестрация модулей</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note">Для реальной эксплуатации я бы рекомендовал стартовать с <span class="ok">Пакета 2</span>, потому что он уже даёт не просто демо, а рабочую систему, с которой можно выходить в эксплуатацию и развивать её дальше по модулям.</div>
+    </section>
+
+    <section class="card section reveal">
+      <h2>Смета по этапам</h2>
+      <div class="table">
+        <div class="row head"><div>Этап работ</div><div>Срок</div><div>Стоимость</div></div>
+        <div class="row"><div>Архитектура проекта, схема модулей, карта источников, проектирование пайплайнов</div><div>3–7 дней</div><div>40 000 – 80 000 ₽</div></div>
+        <div class="row"><div>Telegram-публикация, режимы Draft / Auto, шаблоны, scheduler, антидубликация</div><div>1–2 недели</div><div>70 000 – 140 000 ₽</div></div>
+        <div class="row"><div>Котировки, макрокалендарь, базовые новости и ежедневные посты</div><div>1–2 недели</div><div>80 000 – 160 000 ₽</div></div>
+        <div class="row"><div>Модули по центробанкам, регуляторам, официальным документам и решениям</div><div>1–3 недели</div><div>90 000 – 220 000 ₽</div></div>
+        <div class="row"><div>Корпоративные документы, EDGAR / IR, крупные корпоративные события</div><div>1–3 недели</div><div>90 000 – 250 000 ₽</div></div>
+        <div class="row"><div>Геополитика, фильтрация источников, важность, alert-сценарии</div><div>1–2 недели</div><div>60 000 – 140 000 ₽</div></div>
+        <div class="row"><div>Изображения, библиотека медиа, подстановки, правила для документов</div><div>3–7 дней</div><div>40 000 – 90 000 ₽</div></div>
+        <div class="row"><div>Docker, deploy, инструкции, передача проекта, финальная приёмка</div><div>3–7 дней</div><div>40 000 – 100 000 ₽</div></div>
+      </div>
+    </section>
+
+    <section class="card section reveal">
+      <h2>Сопровождение после запуска</h2>
+      <div class="grid">
+        <div class="pkg">
+          <h3>Базовая поддержка</h3>
+          <div class="price">49 000 ₽ / мес</div>
+          <ul>
+            <li>Контроль работоспособности</li>
+            <li>Проверка логов</li>
+            <li>Мелкие исправления</li>
+            <li>Контроль публикаций и перезапусков</li>
+            <li>Поддержание стабильной эксплуатации</li>
+          </ul>
+        </div>
+        <div class="pkg">
+          <h3>Поддержка + развитие</h3>
+          <div class="price">99 000 ₽ / мес</div>
+          <ul>
+            <li>Всё из базовой поддержки</li>
+            <li>Регулярные доработки</li>
+            <li>Подключение новых источников</li>
+            <li>Правки шаблонов и логики</li>
+            <li>Приоритетная работа по улучшениям</li>
+          </ul>
+        </div>
+        <div class="pkg">
+          <h3>Приоритетное сопровождение</h3>
+          <div class="price">149 000 ₽ / мес</div>
+          <ul>
+            <li>Активное развитие системы</li>
+            <li>Быстрая реакция на задачи</li>
+            <li>Расширение модулей и сценариев</li>
+            <li>Масштабирование по источникам и рынкам</li>
+            <li>Глубокое сопровождение эксплуатации</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card section reveal">
+      <div class="split">
+        <div class="mini">
+          <h2>Что входит в сильную рабочую реализацию</h2>
+          <ul>
+            <li>Проверенные источники высокого уровня</li>
+            <li>Структурирование данных по модулям</li>
+            <li>Гибкие шаблоны без правки кода</li>
+            <li>Режимы проверки и автопубликации</li>
+            <li>Медиа-логика для стандартных постов</li>
+            <li>Логирование, retry и антидубли</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h2>Что оплачивается отдельно</h2>
+          <ul>
+            <li>Платные API и внешние подписки</li>
+            <li>VPS / cloud-инфраструктура</li>
+            <li>Платные провайдеры рыночных данных</li>
+            <li>Дополнительный дизайн, креативы, визуалы</li>
+            <li>Существенные изменения ТЗ после старта</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note">Оптимальная стратегия запуска, это идти этапами: сначала базовая автоматизация и публикации, затем документы и регуляторы, затем корпоративные события, затем усиление админки, логики и масштабируемости.</div>
+      <div class="footer">Если хочешь, можно адаптировать это КП под конкретного заказчика: добавить его бренд, убрать лишнее, сократить формулировки или сделать VIP-версию на 1 экран.</div>
+    </section>
+  </div>
+  <script>
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{ if(entry.isIntersecting) entry.target.classList.add('show'); });
+    },{threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+  </script>
+</body>
+</html>
